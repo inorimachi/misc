@@ -1,0 +1,72 @@
+영상
+
+youtube-dl -f mp4 -i "https://manifest.prod.boltdns.net/manifest/v1/hls/v4/clear/4235717419001/2f5bad35-6f62-4520-84e2-28a4a3f3c347/10s/master.m3u8?fastly_token=NjFkODhhNzdfMTBlNTc4MTlhZDUwNmMyMjIzZDUwNmI3YTRmODcyMTk1MTYzOTBhM2EyNzA2MDEyODE0ZjA5NTU0YzY5MGVjMg%3D%3D"
+
+Vimeo live event(마치의 영화관 라이브)
+
+youtube-dl --list-formats --referer "https://www.inorimachi.com/" https://player.vimeo.com/video/1034474638
+
+온센
+
+youtube-dl -x --audio-format mp3 --audio-quality 0 -i https://onsen-ma3phlsvod.sslcs.cdngc.net/onsen-ma3pvod/_definst_/202404/bocchan240402ccme-12.mp4/chunklist.m3u8 \
+              --add-header Accept:"*/*" \
+              --add-header Accept-Encoding:"gzip, deflate, br" \
+              --add-header Accept-Language:"ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7" \
+              --add-header Connection:"keep-alive" \
+              --add-header Host:"onsen-ma3phlsvod.sslcs.cdngc.net" \
+              --add-header Origin:"https://www.onsen.ag" \
+              --add-header Referer:"https://www.onsen.ag/" \
+              --add-header sec-ch-ua:'" Not A;Brand;v=8, Chromium;v=117, Google Chrome;v=117"' \
+              --add-header sec-ch-ua-platform:"macOS" \
+              --add-header Sec-Fetch-Dest:"empty" \
+              --add-header Sec-Fetch-Mode:"cors" \
+              --add-header Sec-Fetch-Site:"cross-site" \
+              --add-header User-Agent:"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"
+
+음성
+
+youtube-dl -x --audio-format mp3 --audio-quality 0 ffmpeg.exe -i "https://manifest.prod.boltdns.net/manifest/v1/hls/v4/clear/4235717419001/2f5bad35-6f62-4520-84e2-28a4a3f3c347/00c1ea4e-b433-4864-96be-f7904e8663aa/10s/rendition.m3u8?fastly_token=NjFkODkzNDlfNjJiZjcwYjIyNWRiMjA4MzA4NzlkNjZiYTBhNjNhMDdiYTdiZGY5MGI2ZjBmNTMzMzc2OTRlOTFlYTM1YTZkOA%3D%3D"
+
+플레이리스트 역순
+
+youtube-dl --playlist-reverse -f mp4 (or -x --audio-format mp3) https://www.youtube.com/playlist?list=PLb_-A9XviX1GfJHUCeSb5j3aIYXvTCG5R
+
+플레이리스트 번호골라서
+
+youtube-dl --playlist-items 번호 -f mp4 (or -x --audio-format mp3) URL
+
+플레이리스트 제목 골라서
+
+youtube-dl --match-title 정규식 -f mp4 (or -x --audio-format mp3) URL
+
+youtube-dl --playlist-items 1,2 -f mp4 (or -x --audio-format mp3) https://www.youtube.com/playlist?list=PL8fgX9U51tx4wG4oIHXuP5v5D1jvCfP8V
+
+헤더 오류로 다운로드가 실패하는 경우(헤더 추가의 비밀)
+
+/동영상/ffmpeg/youtube-dl -f mp4 -i "https://ndoodle.xyz/cdn/hls/159cd4f8dc93bb007f4cd1ba72c9624e/master.txt" --add-header "':authority:': 'ndoodle.xyz'" --add-header "'method': 'GET'" --add-header "':path:': '/m3/SUtUMjA2QnlxbkZJRTkrS2F4dThoQVJ3anlQMFc0ZmxVNzdIOGplVlN2L1d3M1g1TnZGajNxQnROUUx4bG9PaUFVTlVxOUE1WU15TVJaNFhvVUZBTmlOYUEvc0duU3NrVHVQQVBycVlRZ01RSU5QeUpJZDFwcVdzaytiK3FZVXlsMjRGS0hDcWNYMTJNWTVSLzROMHN0aUk1MzhMRDNGR0E0dCs0b2lwRzI5ZjF2T2FKWFdiaTVtUU9UMnpNN1ZiUExocWVBQ1RPSU9kVFUycUpRZ05sSHhYL0N3bHdSdklHRGVmUndXTG9FeUkrNlI4cGhpbmp5SUhwMW9pVU44azQxUEY0eDZaUVJMUmFEVGdFaHdaOUhVMWkrNlZtRGdXYXNpOTByQ2sxVG89'" --add-header "':scheme:': 'https'" --add-header "accept: */*" --add-header "accept-encoding: gzip, deflate, br" --add-header "referer: https://ndoodle.xyz/video/211c1e0b83b9c69fa9c4bdede203c1e3" --add-header "sec-ch-ua: ' Not A;Brand';v=99', 'Chromium';v='96', 'Google Chrome';v='96'"
+
+TVer
+
+youtube-dl -f mp4 <master.m3u8 URL> -o video.mp4
+youtube-dl -f mp4 <rendition.m3u8 중 용량 적은쪽(보통 첫번째) URL> -o audio.mp4
+ffmpeg -i video.mp4 -i audio.mp4 -c:v copy -c:a aac output.mp4
+
+mpd (DRM encrypted)
+
+- chrome extension 의 개발자모드 기능으로 drm_decryptor 을 로드함 (Android Widevine 추출 등 자세한건 md 파일 참조)
+- youtube-dl --allow-unplayable -x <mpd 파일 URL> -o crypted
+- ffmpeg -decryption_key <생성된 kid:key 에서 key부분> -i crypted*.mp4 -c copy video.mp4
+- ffmpeg -decryption_key <생성된 kid:key 에서 key부분> -i crypted*.m4a -c copy audio.m4a
+- ffmpeg -i video.mp4 -i audio.m4a -c:v copy -c:a aac output.mp4
+
+eplus
+
+youtube-dl -f mp4 \
+--add-header "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36" \
+--add-header "Cookie: <Cookie값>" \
+--add-header "Sec-Ch-Ua-Platform: macOS" \
+--add-header "Pragma: no-cache" \
+--add-header "Sec-Ch-Ua: \"Google Chrome\";v=\"119\", \"Chromium\";v=\"119\", \"Not?A_Brand\";v=\"24\"" \
+--add-header "Origin: https://live.eplus.jp" \
+--add-header "Referer: https://live.eplus.jp/" \
+https://vod.live.eplus.jp/out/v1/3cf6dbd33a884bb4ab8c21c588ec2ee2/1cddf049f3e68fda479b63d6276cccfe/index_2.m3u8

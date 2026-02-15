@@ -1,0 +1,83 @@
+mp4 download
+
+ffmpeg.exe -i https://hoge.fuga.piyo/playlist.m3u8-bsf:a_aac_adtstoasc -c copy ..\gochiusa10th.mp4
+
+merging audio & video (2 files together) - -i와 -c 는 순서대로 맞춰줄 것!
+
+ffmpeg -i video.mp4 -i audio.wav -c:v copy -c:a aac output.mp4
+
+영상에서 오디오만 추출
+
+ffmpeg -i sample.avi -q:a 0 -map a sample.mp3
+
+비리비리 다운로드법
+
+network 에 m4s 검색해서 우클릭-새탭에서 열기-동영상, 음성 나눠져있으므로 둘 다 받기-위의 머지하는 방식으로 합치기
+
+/동영상/ffmpeg/ffmpeg.exe -i "현실주의용사의 왕국재건기 1기-13.mp4" -i "현실주의용사의 왕국재건기 1기-13.mp3" -c:v copy -c:a aac 13.mp4
+
+ffmpeg -i ../input.ts -c:v libx264 -c:a copy output.mp4
+
+GA문고 2022 신년 애니메축제
+
+Vimeo
+
+영상 재생후에 나오는 playlist.json 에서 최고화질/음질 mp4 ID를 찾은 후 재생
+찾은 ID가 네트워크란에 나오기 시작하면 URL 복사해서 curl (비디오, 오디오 각각)
+둘 다 받았으면 ffmpeg으로 병합
+
+or `youtube-dl -f mp4 --referer 'https://www.inorimachi.com/' https://player.vimeo.com~~~`
+
+drm decrypt download
+
+- chrome extension 에 drm_decryptor 을 개발자모드로 추가
+- 해당 영상 페이지를 리로드한 후 크롬확장을 실행
+- pssh 란에 mpd 나 json 의 video/audio 각각에 맞는 cenc pssh 를 찾아 선택
+- 라이센스란에 라이센스가 있을법한 페이지 URL 을 선택
+- 형식은 CommonWV 그대로
+- Guess 를 돌려서 나오는 값의 : 뒷쪽 값을 복사
+  - UNext 비디오는 3개 or 6개가 나오는데 1번째 키가 오디오, 2번째 키가 비디오
+- 해당 페이지의 video_*.mp4, audio_*.mp4 를 curl -O 로 다운로드
+- 비디오라면 `ffmpeg -decryption_key <위에서 복사한 값> -i video_*.mp4 -c:v copy video.mp4`
+- 오디오라면 `ffmpeg -decryption_key <위에서 복사한 값> -i audio_*.mp4 -c:a copy audio.m4a`
+- `ffmpeg -i video.mp4 -i audio.m4a -c:v copy -c:a aac output.mp4`
+
+ffmpeg -decryption_key c57a84a508194b3a8fe5fc5406218394 -i video_*.mp4 -c:v copy video.mp4
+ffmpeg -decryption_key ae9c1c60ff2a45c38e2974b2e9718ad2 -i audio_*.mp4 -c:a copy audio.m4a
+
+dcb5d354b7ef11efa504985aebd49c96:6b0d107b0c9540cd80fbede706cd0739
+dcb5d051b7ef11ef8889985aebd49c96:4f53cbe262b94a8ca5fb35736ce4df14
+
+unext_download_decoder.sh specs
+
+OUTPUT_NAME=$1
+VIDEO_URL=$2
+AUDIO_URL=$3
+AUDIO_KEY=`echo $4 | awk -F ':' '{print $2}'`
+VIDEO_KEY=`echo $5 | awk -F ':' '{print $2}'`
+
+
+일반 drm decrypt
+ffmpeg -decryption_key e42686a4ee3a44319980f4f4b98f1fd1 -i video_written_init.mp4 -c:v copy video.mp4
+ffmpeg -decryption_key e42686a4ee3a44319980f4f4b98f1fd1 -i audio_written_init.mp4 -c:a copy audio.m4a
+
+828a14b1b641476db42109500947d50c:e42686a4ee3a44319980f4f4b98f1fd1
+
+nicolive timeshift (다시보기)
+# 384Kbps 될까 싶었는데 안됨...
+# copy as cURL 에서 -H 를 --add-headers 로, -b 를 --add-headers 'cookie: 로
+
+youtube-dl -f trial-audio-192Kbps-Main_Audio+6000 'https://assetdelivery.dlive.nicovideo.jp/hlsbid/vod/67df51862f4e9bd813fc0613/playlists/variants/0f299628d4fab921.m3u8?Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9hc3NldGRlbGl2ZXJ5LmRsaXZlLm5pY292aWRlby5qcC9obHNiaWQvdm9kLzY3ZGY1MTg2MmY0ZTliZDgxM2ZjMDYxMy8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzQyNzgxODQ4fX19XX0_&Signature=LbgTdNDUbNgSW630c9yRZdtcKWzbjRVnttl4B0k8T0bE1VO4oYgZCxECqFOZDYxb4XuHtCZjxjJDOfAjx6qgHSRjirKuVlfN5icDGcfq6CvrPSHh9BAYellXAIadVR6YuqhFsoW5vAgUrmjtEe-86dzkhjlvqaAYElt1vXSC1zcS3C9~nO6LHIow2DbS0VJDTlPSiwLeEswW2I6jNpTcbBlIdwCY-Il157BS4UecAIukQd~OBNVRW~eur72fc8wHhKgOAZdoBG1J5cYgEta5rkS8A-zoU~oamFN7XTWibc34XxymFl6DeCUyQtQABvftJbauUwR5NHwcEjosoJ6r~g__&Key-Pair-Id=KRX7K7BTCDCJI' \
+  --add-headers 'accept: */*' \
+  --add-headers 'accept-language: en-US,en;q=0.9,ko;q=0.8' \
+  --add-headers 'cookie: nicosid=1742621373.786160045; _fbp=fb.1.1742621374197.264878333336280484; _ga=GA1.1.1869911948.1742621374; _gcl_au=1.1.1942152041.1742621375; _yjsu_yjad=1742621374.76c0a3b0-84a5-4668-b387-13d292afb2a2; pbjs_sharedId=2828008e-aab1-4627-a0e1-a3d6cafba26b; pbjs_sharedId_cst=zix7LPQsHA%3D%3D; _tt_enable_cookie=1; _ttp=01JPY57YE5KBZCQQT433X5CCE3_.tt.1; audience_token=117841021597008_7daac8a7adf785e256acdb1bd5919395d2d53732; experimentalNicoliveColorTheme=light; _ga_2C724T1SX9=GS1.1.1742621781.1.1.1742622336.60.0.0; _unv_aid=a6b63034a03aba4b63fc13549368384beae01fb71ca59bb0; nico_gc=srch_s%3Df%26srch_o%3Dd; _td=904fa7c3-2906-4830-b98e-b7a2453a6bc2; dlive_bid=WQxcs7Hs9WGfzmac98iw8lo1AtksftaM; _unv_id=01JPYCKSS6ZEXN84NPQ37XD65T; user_session=user_session_139269845_7e60b0b2f8dc2a0ae3a5c12982803d7d6e63dfa7a78fa5d565d81a1521755fea; user_session_secure=MTM5MjY5ODQ1OnN1T1J5RUF5d1dRc1R3QXhLS0kyMTJXbS1hYy5oYklkMkNPcG1EbnJJY0I; _ga_2CZR0NHHZ1=GS1.1.1742693392.2.1.1742693426.26.0.0; _clck=1muaptb%7C2%7Cfug%7C0%7C1907; AMZN-Token=v2FweIBOMFhtdXRYeC9SVEhiZmZWUmNiUFJRdC9vOXFWSFRaS3NFQTUwMEFCeHBiNGhvSjFxNHFqSjhKNVQxQ3U1TFY3OUFHWEI2SU5TTmdFNTVaaS94MlArck9jeWxUSFM2RzhvQ0JLWGZFY3lJVWlqa1lveDZRMnBZQUUzcktCT2FsemJrdgFiaXZ4HDc3Kzk3Nys5ZldZSmIwanZ2NzBpNzcrOUlRPT3/; nicolivehistory=%5B347146751%2C347183370%2C347147247%2C347175925%2C347224050%2C347183262%2C347146531%5D; _clsk=yiuvv9%7C1742693437424%7C2%7C1%7Cp.clarity.ms%2Fcollect; common-header-oshirasebox-new-allival=false; __gads=ID=2ca987aa94b7afc0:T=1735483804:RT=1742695230:S=ALNI_MafNr96hj8bkSvEXrRhyFwtGYbqew; __gpi=UID=00000fc018a486d6:T=1735483807:RT=1742695230:S=ALNI_Maw_zmWv-rL5JpO7h126GX1rby1sA; __eoi=ID=86b2a3f65a76073b:T=1735483807:RT=1742695230:S=AA-AfjbX3fQMCKDAPlifrkgUegtN; cto_bundle=bNBY5F8lMkJYYjZUT0lOTCUyRjhGc3dDQjNNQ0pFQnJLRUNHdnVMaGNNbUgyUmxPU1ZxZGMxVDNWSkUlMkYyNWpkcSUyQmhqd1Zhcnl5UmppT3U2eTNOaVZqSHNHNFdtZWNYNFV4eU9leEdGM0NHYVhRNUl4Y2c5cjg3VDlYYkNORVIlMkYwcmM3dEFHZmtQdXhUVTVsTWFKZjA1aE9zZ2QlMkZuendwS09abmFYSjUxTzJJUDU0TTMlMkZQRmt0S3NIM1BPZVFvdG5LQkx2UGp4JTJCVXRTVkk5d3d4S0QlMkZSbzdlbmVpcFZ5OSUyQmdaRFAlMkJ3RkRBWTZsekVZM010TmE5dzZFU2pYOHBYJTJCaEVoN0tUTWdD; _ga_FS29H4ZGX2=GS1.1.1742695229.5.1.1742695446.40.0.0; _ga_5LM4HED1NJ=GS1.1.1742693388.3.1.1742695447.39.0.0; _ga_BQN96KXPNS=GS1.1.1742693388.3.1.1742695447.39.0.0' \
+  --add-headers 'origin: https://live.nicovideo.jp' \
+  --add-headers 'priority: u=1, i' \
+  --add-headers 'referer: https://live.nicovideo.jp/' \
+  --add-headers 'sec-ch-ua: "Not(A:Brand";v="99", "Google Chrome";v="133", "Chromium";v="133"' \
+  --add-headers 'sec-ch-ua-mobile: ?0' \
+  --add-headers 'sec-ch-ua-platform: "macOS"' \
+  --add-headers 'sec-fetch-dest: empty' \
+  --add-headers 'sec-fetch-mode: cors' \
+  --add-headers 'sec-fetch-site: same-site' \
+  --add-headers 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36'
