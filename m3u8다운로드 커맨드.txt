@@ -26,7 +26,7 @@ Vimeo
 찾은 ID가 네트워크란에 나오기 시작하면 URL 복사해서 curl (비디오, 오디오 각각)
 둘 다 받았으면 ffmpeg으로 병합
 
-or `youtube-dl -f mp4 --referer 'https://www.inorimachi.com/' https://player.vimeo.com~~~`
+or `youtube-dl -f mp4 --referer '<그 사이트 Referer 헤더값>' https://player.vimeo.com~~~`
 
 drm decrypt download
 
@@ -81,3 +81,4 @@ youtube-dl -f trial-audio-192Kbps-Main_Audio+6000 'https://assetdelivery.dlive.n
   --add-headers 'sec-fetch-mode: cors' \
   --add-headers 'sec-fetch-site: same-site' \
   --add-headers 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36'
+
