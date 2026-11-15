@@ -1,0 +1,1 @@
+magick image1.jpg image2.jpg -append output.png
