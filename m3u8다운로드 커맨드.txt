@@ -26,18 +26,20 @@ Vimeo
 찾은 ID가 네트워크란에 나오기 시작하면 URL 복사해서 curl (비디오, 오디오 각각)
 둘 다 받았으면 ffmpeg으로 병합
 
-or `youtube-dl -f mp4 --referer '<그 사이트 Referer 헤더값>' https://player.vimeo.com~~~`
+or `youtube-dl -f mp4 --referer '<해당 파일의 referer URL>' https://player.vimeo.com~~~`
 
 drm decrypt download
 
-- chrome extension 에 drm_decryptor 을 개발자모드로 추가
-- 해당 영상 페이지를 리로드한 후 크롬확장을 실행
-- pssh 란에 mpd 나 json 의 video/audio 각각에 맞는 cenc pssh 를 찾아 선택
-- 라이센스란에 라이센스가 있을법한 페이지 URL 을 선택
-- 형식은 CommonWV 그대로
-- Guess 를 돌려서 나오는 값의 : 뒷쪽 값을 복사
-  - UNext 비디오는 3개 or 6개가 나오는데 1번째 키가 오디오, 2번째 키가 비디오
-- 해당 페이지의 video_*.mp4, audio_*.mp4 를 curl -O 로 다운로드
+- python 환경 정비(python3 -m venv env && source env/bin/activate)
+- ssnangua/l3-keys 의 l3-cli 실행환경 정비(python3 -m pip install pywidevine pyaml)
+  - 필요에 따라 widevine l3 키를 생성해놓을 것
+- mpd나 json을 찾아서 받고 파일 내에서 pssh 와 라이센스 취득 URL을 추가
+- python3 -m l3-cli -pssh <위에서 취득한 pssh> -lic_url <위에서 취득한 URL>
+- 나오는 값의 : 뒷쪽 값을 복사
+  - UNext 비디오는 3개 or 6개가 나오는데 1번째 키가 오디오, 2번째 키가 비디오(품질에 따라 다를수도)
+- 해당 페이지의 mp4나 m4f, m4s/m4a, ts 등 암호화상태의 조각들을 curl -O 로 다운로드
+  - init 이 존재하는 경우, 비디오/오디오 각각의 init을 받아서 복사해두기(init=파일의 헤더)
+  - 모든 조각의 curl 이 끝난 경우 for <파일개수>; do cat <각 파일> >> init; done
 - 비디오라면 `ffmpeg -decryption_key <위에서 복사한 값> -i video_*.mp4 -c:v copy video.mp4`
 - 오디오라면 `ffmpeg -decryption_key <위에서 복사한 값> -i audio_*.mp4 -c:a copy audio.m4a`
 - `ffmpeg -i video.mp4 -i audio.m4a -c:v copy -c:a aac output.mp4`
@@ -47,21 +49,6 @@ ffmpeg -decryption_key ae9c1c60ff2a45c38e2974b2e9718ad2 -i audio_*.mp4 -c:a copy
 
 dcb5d354b7ef11efa504985aebd49c96:6b0d107b0c9540cd80fbede706cd0739
 dcb5d051b7ef11ef8889985aebd49c96:4f53cbe262b94a8ca5fb35736ce4df14
-
-unext_download_decoder.sh specs
-
-OUTPUT_NAME=$1
-VIDEO_URL=$2
-AUDIO_URL=$3
-AUDIO_KEY=`echo $4 | awk -F ':' '{print $2}'`
-VIDEO_KEY=`echo $5 | awk -F ':' '{print $2}'`
-
-
-일반 drm decrypt
-ffmpeg -decryption_key e42686a4ee3a44319980f4f4b98f1fd1 -i video_written_init.mp4 -c:v copy video.mp4
-ffmpeg -decryption_key e42686a4ee3a44319980f4f4b98f1fd1 -i audio_written_init.mp4 -c:a copy audio.m4a
-
-828a14b1b641476db42109500947d50c:e42686a4ee3a44319980f4f4b98f1fd1
 
 nicolive timeshift (다시보기)
 # 384Kbps 될까 싶었는데 안됨...
@@ -82,3 +69,8 @@ youtube-dl -f trial-audio-192Kbps-Main_Audio+6000 'https://assetdelivery.dlive.n
   --add-headers 'sec-fetch-site: same-site' \
   --add-headers 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36'
 
+AES-128 암호화된 m3u8 과 ts(mp4) 파일로 이루어진 경우
+1. chunklist.m3u8(ts나 mp4 파일 URL이 써있는 리스트파일) 와 key 파일, ts파일 전부를 다운로드
+2. Key 부분에 다운받은 key파일을 대입
+3. ts/mp4 파일 패스 부분에 파일을 다운받은 ts/mp4 패스들을 대입
+4. ffmpeg -protocol_whitelist tcp,tls,https,http,crypto,file,data -allowed_extensions ALL -i chunklist.m3u8 -c copy output.mp4
