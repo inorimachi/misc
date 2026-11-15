@@ -51,14 +51,6 @@ youtube-dl -f mp4 <master.m3u8 URL> -o video.mp4
 youtube-dl -f mp4 <rendition.m3u8 중 용량 적은쪽(보통 첫번째) URL> -o audio.mp4
 ffmpeg -i video.mp4 -i audio.mp4 -c:v copy -c:a aac output.mp4
 
-mpd (DRM encrypted)
-
-- chrome extension 의 개발자모드 기능으로 drm_decryptor 을 로드함 (Android Widevine 추출 등 자세한건 md 파일 참조)
-- youtube-dl --allow-unplayable -x <mpd 파일 URL> -o crypted
-- ffmpeg -decryption_key <생성된 kid:key 에서 key부분> -i crypted*.mp4 -c copy video.mp4
-- ffmpeg -decryption_key <생성된 kid:key 에서 key부분> -i crypted*.m4a -c copy audio.m4a
-- ffmpeg -i video.mp4 -i audio.m4a -c:v copy -c:a aac output.mp4
-
 eplus
 
 youtube-dl -f mp4 \
